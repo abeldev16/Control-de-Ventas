@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<!-- saved from url=(0033)http://127.0.0.1:5500/kardex.html -->
+<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kardex — Ingresos, Egresos, Ventas e Inventario</title>
+<link rel="stylesheet" href="./Kardex — Ingresos, Egresos, Ventas e Inventario_files/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#f5f5f3;color:#1a1a1a;min-height:100vh}
+.container{max-width:980px;margin:0 auto;padding:2rem 1rem}
+h1{font-size:22px;font-weight:500;margin-bottom:1.5rem;color:#1a1a1a}
+h1 span{color:#888;font-weight:400;font-size:15px;margin-left:8px}
+.tabs{display:flex;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap}
+.tab{padding:8px 18px;border:0.5px solid #ccc;border-radius:8px;background:#fff;color:#555;cursor:pointer;font-size:14px;display:flex;align-items:center;gap:6px}
+.tab.active{background:#eee;color:#111;border-color:#999;font-weight:500}
+.tab:hover{background:#f0f0f0}
+.section{display:none}.section.active{display:block}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:1.5rem}
+.card{background:#e8e8e5;border-radius:8px;padding:1rem}
+.card-label{font-size:12px;color:#666;margin-bottom:6px}
+.card-value{font-size:22px;font-weight:500;color:#111}
+.card-value.green{color:#0F6E56}.card-value.red{color:#A32D2D}.card-value.blue{color:#185FA5}
+.toolbar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
+.toolbar input,.toolbar select{padding:7px 10px;border:0.5px solid #ccc;border-radius:8px;background:#fff;color:#111;font-size:13px}
+.toolbar input:focus,.toolbar select:focus{outline:none;border-color:#999}
+.btn{padding:7px 14px;border:0.5px solid #ccc;border-radius:8px;background:#fff;color:#111;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;gap:5px}
+.btn:hover{background:#f0f0f0}
+.btn.primary{background:#dbeeff;color:#185FA5;border-color:#b3d4f7}
+.btn.primary:hover{background:#c8e2fa}
+.btn.danger{background:#fde8e8;color:#A32D2D;border-color:#f5c1c1}
+.btn.danger:hover{background:#fbd0d0}
+.btn.warning{background:#fef0d4;color:#854F0B;border-color:#fad89a}
+.btn.warning:hover{background:#fde6b8}
+.btn.sm{padding:4px 8px;font-size:12px}
+table{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border-radius:10px;overflow:hidden}
+th{background:#f0f0ee;color:#666;font-weight:500;padding:9px 12px;text-align:left;border-bottom:0.5px solid #ddd;white-space:nowrap}
+td{padding:8px 12px;border-bottom:0.5px solid #eee;color:#111;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafaf8}
+.actions{display:flex;gap:6px}
+.badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:500}
+.badge.ingreso{background:#d4f0e4;color:#0F6E56}
+.badge.egreso{background:#fde8e8;color:#A32D2D}
+.badge.venta{background:#dbeeff;color:#185FA5}
+.badge.ajuste{background:#fef0d4;color:#854F0B}
+.badge.normal{background:#d4f0e4;color:#0F6E56}
+.badge.bajo{background:#fef0d4;color:#854F0B}
+.badge.sin-stock{background:#fde8e8;color:#A32D2D}
+.empty{text-align:center;color:#999;padding:2rem;font-size:13px}
+.tbl-wrap{overflow-x:auto;border-radius:10px;border:0.5px solid #e0e0e0}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:12px;border:0.5px solid #ddd;padding:1.5rem;width:380px;max-width:95vw;max-height:90vh;overflow-y:auto}
+.modal h3{font-size:16px;font-weight:500;margin-bottom:1rem}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-size:12px;color:#666;margin-bottom:4px}
+.form-group input,.form-group select{width:100%;padding:8px 10px;border:0.5px solid #ccc;border-radius:8px;background:#fff;color:#111;font-size:13px}
+.form-group input:focus,.form-group select:focus{outline:none;border-color:#999}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1rem}
+.confirm-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center}
+.confirm-bg.open{display:flex}
+.confirm-box{background:#fff;border-radius:12px;padding:1.5rem;width:320px;max-width:95vw;text-align:center}
+.confirm-box p{font-size:14px;color:#444;margin-bottom:1.25rem}
+.confirm-box .actions{justify-content:center}
+@media(prefers-color-scheme:dark){
+  body{background:#1a1a1a;color:#e8e8e5}
+  h1{color:#e8e8e5}
+  .tab{background:#2a2a2a;border-color:#444;color:#aaa}
+  .tab.active{background:#333;color:#e8e8e5;border-color:#666}
+  .tab:hover{background:#2f2f2f}
+  .card{background:#2a2a2a}.card-label{color:#aaa}.card-value{color:#e8e8e5}
+  .toolbar input,.toolbar select{background:#2a2a2a;border-color:#444;color:#e8e8e5}
+  .btn{background:#2a2a2a;border-color:#444;color:#e8e8e5}
+  .btn:hover{background:#333}
+  .btn.primary{background:#1a3a5c;color:#85b7eb;border-color:#2d5a8a}
+  .btn.danger{background:#3a1a1a;color:#f09595;border-color:#6a2a2a}
+  .btn.warning{background:#3a2a1a;color:#efcf87;border-color:#6a4a1a}
+  table{background:#2a2a2a}
+  th{background:#222;color:#aaa;border-color:#333}
+  td{border-color:#333;color:#e8e8e5}
+  tr:hover td{background:#2f2f2f}
+  .tbl-wrap{border-color:#333}
+  .modal,.confirm-box{background:#2a2a2a;border-color:#444}
+  .modal h3,.confirm-box h3{color:#e8e8e5}
+  .form-group label{color:#aaa}
+  .form-group input,.form-group select{background:#222;border-color:#444;color:#e8e8e5}
+  .confirm-box p{color:#aaa}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Control de Ventas <span>Ingresos, egresos, ventas e inventario</span></h1>
+
+  <div class="tabs">
+    <button class="tab" onclick="showTab(&#39;kardex&#39;)"><i class="ti ti-list"></i> Kardex</button>
+    <button class="tab" onclick="showTab(&#39;ventas&#39;)"><i class="ti ti-shopping-cart"></i> Ventas</button>
+    <button class="tab active" onclick="showTab(&#39;inventario&#39;)"><i class="ti ti-package"></i> Inventario</button>
+    <button class="tab" onclick="showTab(&#39;resumen&#39;)"><i class="ti ti-chart-bar"></i> Resumen</button>
+  </div>
+
+  <!-- KARDEX -->
+  <div id="sec-kardex" class="section">
+    <div class="cards">
+      <div class="card"><div class="card-label">Total ingresos</div><div class="card-value green" id="tot-ing">S/ 0.00</div></div>
+      <div class="card"><div class="card-label">Total egresos</div><div class="card-value red" id="tot-egr">S/ 0.00</div></div>
+      <div class="card"><div class="card-label">Saldo neto</div><div class="card-value blue" id="tot-saldo">S/ 0.00</div></div>
+      <div class="card"><div class="card-label">Movimientos</div><div class="card-value" id="tot-mov">0</div></div>
+    </div>
+    <div class="toolbar">
+      <input type="date" id="k-fecha-ini">
+      <input type="date" id="k-fecha-fin">
+      <select id="k-tipo">
+        <option value="">Todos los tipos</option>
+        <option value="ingreso">Ingreso</option>
+        <option value="egreso">Egreso</option>
+        <option value="venta">Venta</option>
+        <option value="ajuste">Ajuste</option>
+      </select>
+      <button class="btn" onclick="renderKardex()"><i class="ti ti-filter"></i> Filtrar</button>
+      <button class="btn primary" onclick="abrirModal(&#39;kardex&#39;,null)"><i class="ti ti-plus"></i> Nuevo</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Fecha</th><th>Tipo</th><th>Concepto</th><th>Referencia</th><th style="text-align:right">Monto</th><th style="text-align:right">Saldo acum.</th><th>Acciones</th></tr></thead>
+        <tbody id="tbody-kardex"><tr><td colspan="7" class="empty">Sin movimientos</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- VENTAS -->
+  <div id="sec-ventas" class="section">
+    <div class="cards">
+      <div class="card"><div class="card-label">Total ventas</div><div class="card-value green" id="v-total">S/ 0.00</div></div>
+      <div class="card"><div class="card-label">N° órdenes</div><div class="card-value" id="v-ordenes">0</div></div>
+      <div class="card"><div class="card-label">Promedio venta</div><div class="card-value blue" id="v-prom">S/ 0.00</div></div>
+    </div>
+    <div class="toolbar">
+      <input type="text" id="v-buscar" placeholder="Buscar cliente o producto..." style="min-width:200px" oninput="renderVentas()">
+      <button class="btn primary" onclick="abrirModal(&#39;venta&#39;,null)"><i class="ti ti-plus"></i> Nueva venta</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Fecha</th><th>N° orden</th><th>Cliente</th><th>Producto</th><th style="text-align:right">Cant.</th><th style="text-align:right">P. unit.</th><th style="text-align:right">Total</th><th>Acciones</th></tr></thead>
+        <tbody id="tbody-ventas"><tr><td colspan="8" class="empty">Sin ventas</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- INVENTARIO -->
+  <div id="sec-inventario" class="section active">
+    <div class="cards">
+      <div class="card"><div class="card-label">Productos</div><div class="card-value" id="i-prod">3</div></div>
+      <div class="card"><div class="card-label">Stock total</div><div class="card-value blue" id="i-stock">108</div></div>
+      <div class="card"><div class="card-label">Valor inventario</div><div class="card-value green" id="i-valor">S/ 702.00</div></div>
+      <div class="card"><div class="card-label">Stock bajo</div><div class="card-value red" id="i-bajo">0</div></div>
+    </div>
+    <div class="toolbar">
+      <input type="text" id="inv-buscar" placeholder="Buscar producto o categoría..." style="min-width:200px" oninput="renderInventario()">
+      <button class="btn primary" onclick="abrirModal(&#39;producto&#39;,null)"><i class="ti ti-plus"></i> Nuevo producto</button>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Código</th><th>Producto</th><th>Categoría</th><th style="text-align:right">Stock</th><th style="text-align:right">P. costo</th><th style="text-align:right">P. venta</th><th style="text-align:right">Valor</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody id="tbody-inv"><tr>
+      <td>C001</td><td>CERVEZA PILSEN BT X 630 ML.</td><td>Botella</td>
+      <td style="text-align:right;color:inherit;font-weight:400">60</td>
+      <td style="text-align:right">S/ 6.50</td>
+      <td style="text-align:right">S/ 7.00</td>
+      <td style="text-align:right">S/ 390.00</td>
+      <td><span class="badge normal">normal</span></td>
+      <td><div class="actions">
+        <button class="btn warning sm" onclick="abrirModal(&#39;producto&#39;,6)"><i class="ti ti-edit"></i> Editar</button>
+        <button class="btn danger sm" onclick="confirmarEliminar(&#39;producto&#39;,6)"><i class="ti ti-trash"></i></button>
+      </div></td>
+    </tr><tr>
+      <td>C002</td><td>CERVEZA CUZQUEÑA NEGRA  BT X 620 ML.</td><td>Botella</td>
+      <td style="text-align:right;color:inherit;font-weight:400">12</td>
+      <td style="text-align:right">S/ 6.50</td>
+      <td style="text-align:right">S/ 7.50</td>
+      <td style="text-align:right">S/ 78.00</td>
+      <td><span class="badge normal">normal</span></td>
+      <td><div class="actions">
+        <button class="btn warning sm" onclick="abrirModal(&#39;producto&#39;,7)"><i class="ti ti-edit"></i> Editar</button>
+        <button class="btn danger sm" onclick="confirmarEliminar(&#39;producto&#39;,7)"><i class="ti ti-trash"></i></button>
+      </div></td>
+    </tr><tr>
+      <td>C003</td><td>CERVEZA CUZQUEÑA TRIGO BT X 620 ML.	</td><td>Botella</td>
+      <td style="text-align:right;color:inherit;font-weight:400">36</td>
+      <td style="text-align:right">S/ 6.50</td>
+      <td style="text-align:right">S/ 7.50</td>
+      <td style="text-align:right">S/ 234.00</td>
+      <td><span class="badge normal">normal</span></td>
+      <td><div class="actions">
+        <button class="btn warning sm" onclick="abrirModal(&#39;producto&#39;,8)"><i class="ti ti-edit"></i> Editar</button>
+        <button class="btn danger sm" onclick="confirmarEliminar(&#39;producto&#39;,8)"><i class="ti ti-trash"></i></button>
+      </div></td>
+    </tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- RESUMEN -->
+  <div id="sec-resumen" class="section">
+    <div style="background:#fff;border-radius:10px;border:0.5px solid #e0e0e0;padding:1.25rem;margin-bottom:1.5rem">
+      <div style="font-size:14px;color:#666;margin-bottom:1rem;font-weight:500">Ingresos vs egresos por mes</div>
+      <div style="display:flex;gap:16px;margin-bottom:12px;font-size:12px;color:#666">
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#1D9E75;display:inline-block"></span>Ingresos</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#E24B4A;display:inline-block"></span>Egresos</span>
+      </div>
+      <div style="position:relative;height:260px"><canvas id="chart-res" style="box-sizing: border-box; display: block; height: 260px; width: 906px;" width="951" height="272"></canvas></div>
+    </div>
+    <div style="background:#fff;border-radius:10px;border:0.5px solid #e0e0e0;padding:1.25rem">
+      <div style="font-size:14px;color:#666;margin-bottom:1rem;font-weight:500">Top productos vendidos</div>
+      <div class="tbl-wrap" style="border:none">
+        <table>
+          <thead><tr><th>#</th><th>Producto</th><th style="text-align:right">Unidades</th><th style="text-align:right">Total</th></tr></thead>
+          <tbody id="tbody-top"><tr><td colspan="4" class="empty">Sin datos</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FORMULARIO -->
+<div class="modal-bg" id="modal-bg" onclick="cerrarModal(event)">
+  <div class="modal">
+    <h3 id="modal-title">Editar producto</h3>
+    <div id="modal-body"><div class="form-group"><label>Código</label><input type="text" id="m-codigo" value="N002" placeholder="P006"></div>
+    <div class="form-group"><label>Nombre</label><input type="text" id="m-nombre" value="CERVEZA CUZQUEÑA NEGRA  BT X 620 ML." placeholder="Nombre del producto"></div>
+    <div class="form-group"><label>Categoría</label><input type="text" id="m-cat" value="Botella" placeholder="Ej: Accesorios"></div>
+    <div class="form-group"><label>Stock</label><input type="number" id="m-stock" value="12" min="0"></div>
+    <div class="form-group"><label>Precio costo (S/)</label><input type="number" id="m-costo" value="6.5" placeholder="0.00" step="0.01" min="0"></div>
+    <div class="form-group"><label>Precio venta (S/)</label><input type="number" id="m-pventa" value="7.5" placeholder="0.00" step="0.01" min="0"></div></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="document.getElementById(&#39;modal-bg&#39;).classList.remove(&#39;open&#39;)">Cancelar</button>
+      <button class="btn primary" onclick="guardarModal()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR ELIMINACION -->
+<div class="confirm-bg" id="confirm-bg">
+  <div class="confirm-box">
+    <h3 style="font-size:16px;font-weight:500;margin-bottom:8px">¿Eliminar registro?</h3>
+    <p>Esta acción no se puede deshacer.</p>
+    <div class="actions" style="display:flex;gap:8px;justify-content:center">
+      <button class="btn" onclick="document.getElementById(&#39;confirm-bg&#39;).classList.remove(&#39;open&#39;)">Cancelar</button>
+      <button class="btn danger" id="confirm-ok">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<script src="./Kardex — Ingresos, Egresos, Ventas e Inventario_files/chart.umd.min.js.descarga"></script>
+<script>
+let kardex=[
+  {id:1,fecha:'2025-04-01',tipo:'ingreso',concepto:'Compra inicial stock',ref:'OC-001',monto:1500},
+  {id:2,fecha:'2025-04-05',tipo:'venta',concepto:'Venta contado',ref:'ORD-001',monto:-350},
+  {id:3,fecha:'2025-04-10',tipo:'ingreso',concepto:'Pago cliente',ref:'FAC-002',monto:600},
+  {id:4,fecha:'2025-04-15',tipo:'egreso',concepto:'Pago proveedor',ref:'OC-002',monto:-800},
+  {id:5,fecha:'2025-05-02',tipo:'venta',concepto:'Venta crédito',ref:'ORD-002',monto:-520},
+  {id:6,fecha:'2025-05-08',tipo:'ingreso',concepto:'Cobro factura',ref:'FAC-003',monto:520},
+  {id:7,fecha:'2025-05-20',tipo:'ajuste',concepto:'Ajuste inventario',ref:'AJ-001',monto:-80},
+];
+let ventas=[
+  {id:1,fecha:'2025-04-05',orden:'ORD-001',cliente:'María Torres',producto:'Laptop HP',cant:1,precio:350,total:350},
+  {id:2,fecha:'2025-05-02',orden:'ORD-002',cliente:'Juan Pérez',producto:'Mouse Logitech',cant:4,precio:45,total:180},
+  {id:3,fecha:'2025-05-02',orden:'ORD-002',cliente:'Juan Pérez',producto:'Teclado Genius',cant:2,precio:85,total:170},
+  {id:4,fecha:'2025-05-15',orden:'ORD-003',cliente:'Ana Ríos',producto:'Auriculares Sony',cant:1,precio:120,total:120},
+];
+let inventario=[
+  {id:1,codigo:'P001',nombre:'Laptop HP',categoria:'Computadoras',stock:5,costo:280,pventa:350},
+  {id:2,codigo:'P002',nombre:'Mouse Logitech',categoria:'Accesorios',stock:20,costo:30,pventa:45},
+  {id:3,codigo:'P003',nombre:'Teclado Genius',categoria:'Accesorios',stock:3,costo:60,pventa:85},
+  {id:4,codigo:'P004',nombre:'Auriculares Sony',categoria:'Audio',stock:2,costo:85,pventa:120},
+  {id:5,codigo:'P005',nombre:'Monitor LG 24"',categoria:'Monitores',stock:0,costo:200,pventa:280},
+];
+
+let modalTipo='';
+let editId=null;
+let chartRes=null;
+let nextId={k:8,v:5,i:6};
+
+function fmt(n){return 'S/ '+parseFloat(n).toFixed(2);}
+
+function showTab(t){
+  document.querySelectorAll('.tab').forEach((b,i)=>{b.classList.toggle('active',['kardex','ventas','inventario','resumen'][i]===t)});
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+t).classList.add('active');
+  if(t==='resumen')renderResumen();
+}
+
+/* ---- KARDEX ---- */
+function renderKardex(){
+  let fi=document.getElementById('k-fecha-ini').value;
+  let ff=document.getElementById('k-fecha-fin').value;
+  let tp=document.getElementById('k-tipo').value;
+  let data=[...kardex].filter(r=>{
+    if(fi&&r.fecha<fi)return false;
+    if(ff&&r.fecha>ff)return false;
+    if(tp&&r.tipo!==tp)return false;
+    return true;
+  }).sort((a,b)=>a.fecha.localeCompare(b.fecha));
+  let saldo=0,ti=0,te=0;
+  let rows=data.map(r=>{
+    saldo+=r.monto;
+    if(r.monto>0)ti+=r.monto; else te+=Math.abs(r.monto);
+    return `<tr>
+      <td>${r.fecha}</td>
+      <td><span class="badge ${r.tipo}">${r.tipo}</span></td>
+      <td>${r.concepto}</td>
+      <td>${r.ref}</td>
+      <td style="text-align:right;color:${r.monto>0?'#0F6E56':'#A32D2D'};font-weight:500">${r.monto>0?'+':''}${fmt(r.monto)}</td>
+      <td style="text-align:right;font-weight:500">${fmt(saldo)}</td>
+      <td><div class="actions">
+        <button class="btn warning sm" onclick="abrirModal('kardex',${r.id})"><i class="ti ti-edit"></i> Editar</button>
+        <button class="btn danger sm" onclick="confirmarEliminar('kardex',${r.id})"><i class="ti ti-trash"></i></button>
+      </div></td>
+    </tr>`;
+  });
+  document.getElementById('tbody-kardex').innerHTML=rows.length?rows.join(''):'<tr><td colspan="7" class="empty">Sin movimientos</td></tr>';
+  document.getElementById('tot-ing').textContent=fmt(ti);
+  document.getElementById('tot-egr').textContent=fmt(te);
+  document.getElementById('tot-saldo').textContent=fmt(ti-te);
+  document.getElementById('tot-mov').textContent=data.length;
+}
+
+/* ---- VENTAS ---- */
+function renderVentas(){
+  let q=(document.getElementById('v-buscar').value||'').toLowerCase();
+  let data=ventas.filter(r=>!q||r.cliente.toLowerCase().includes(q)||r.producto.toLowerCase().includes(q));
+  let total=data.reduce((a,r)=>a+r.total,0);
+  let ordenes=[...new Set(data.map(r=>r.orden))].length;
+  document.getElementById('v-total').textContent=fmt(total);
+  document.getElementById('v-ordenes').textContent=ordenes;
+  document.getElementById('v-prom').textContent=ordenes?fmt(total/ordenes):'S/ 0.00';
+  let rows=data.map(r=>`<tr>
+    <td>${r.fecha}</td><td>${r.orden}</td><td>${r.cliente}</td><td>${r.producto}</td>
+    <td style="text-align:right">${r.cant}</td>
+    <td style="text-align:right">${fmt(r.precio)}</td>
+    <td style="text-align:right;font-weight:500">${fmt(r.total)}</td>
+    <td><div class="actions">
+      <button class="btn warning sm" onclick="abrirModal('venta',${r.id})"><i class="ti ti-edit"></i> Editar</button>
+      <button class="btn danger sm" onclick="confirmarEliminar('venta',${r.id})"><i class="ti ti-trash"></i></button>
+    </div></td>
+  </tr>`);
+  document.getElementById('tbody-ventas').innerHTML=rows.length?rows.join(''):'<tr><td colspan="8" class="empty">Sin ventas</td></tr>';
+}
+
+/* ---- INVENTARIO ---- */
+function renderInventario(){
+  let q=(document.getElementById('inv-buscar').value||'').toLowerCase();
+  let data=inventario.filter(r=>!q||r.nombre.toLowerCase().includes(q)||r.categoria.toLowerCase().includes(q));
+  document.getElementById('i-prod').textContent=data.length;
+  document.getElementById('i-stock').textContent=data.reduce((a,r)=>a+r.stock,0);
+  document.getElementById('i-valor').textContent=fmt(data.reduce((a,r)=>a+r.stock*r.costo,0));
+  document.getElementById('i-bajo').textContent=data.filter(r=>r.stock<=3).length;
+  let rows=data.map(r=>{
+    let cls=r.stock===0?'sin-stock':r.stock<=3?'bajo':'normal';
+    let lbl=r.stock===0?'sin stock':r.stock<=3?'stock bajo':'normal';
+    return `<tr>
+      <td>${r.codigo}</td><td>${r.nombre}</td><td>${r.categoria}</td>
+      <td style="text-align:right;color:${r.stock<=3?'#A32D2D':'inherit'};font-weight:${r.stock<=3?500:400}">${r.stock}</td>
+      <td style="text-align:right">${fmt(r.costo)}</td>
+      <td style="text-align:right">${fmt(r.pventa)}</td>
+      <td style="text-align:right">${fmt(r.stock*r.costo)}</td>
+      <td><span class="badge ${cls}">${lbl}</span></td>
+      <td><div class="actions">
+        <button class="btn warning sm" onclick="abrirModal('producto',${r.id})"><i class="ti ti-edit"></i> Editar</button>
+        <button class="btn danger sm" onclick="confirmarEliminar('producto',${r.id})"><i class="ti ti-trash"></i></button>
+      </div></td>
+    </tr>`;
+  });
+  document.getElementById('tbody-inv').innerHTML=rows.length?rows.join(''):'<tr><td colspan="9" class="empty">Sin productos</td></tr>';
+}
+
+/* ---- RESUMEN ---- */
+function renderResumen(){
+  let ing=Array(12).fill(0),egr=Array(12).fill(0);
+  kardex.forEach(r=>{let m=parseInt(r.fecha.split('-')[1])-1;if(r.monto>0)ing[m]+=r.monto;else egr[m]+=Math.abs(r.monto);});
+  let meses=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  let activos=meses.filter((_,i)=>ing[i]>0||egr[i]>0);
+  let ingA=ing.filter((_,i)=>ing[i]>0||egr[i]>0);
+  let egrA=egr.filter((_,i)=>ing[i]>0||egr[i]>0);
+  if(chartRes)chartRes.destroy();
+  chartRes=new Chart(document.getElementById('chart-res'),{
+    type:'bar',
+    data:{labels:activos,datasets:[
+      {label:'Ingresos',data:ingA,backgroundColor:'#1D9E75',borderRadius:4},
+      {label:'Egresos',data:egrA,backgroundColor:'#E24B4A',borderRadius:4}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>'S/'+v},grid:{color:'rgba(0,0,0,0.05)'}}}}
+  });
+  let top={};
+  ventas.forEach(v=>{if(!top[v.producto])top[v.producto]={u:0,t:0};top[v.producto].u+=v.cant;top[v.producto].t+=v.total;});
+  let sorted=Object.entries(top).sort((a,b)=>b[1].t-a[1].t);
+  document.getElementById('tbody-top').innerHTML=sorted.length
+    ?sorted.map(([p,d],i)=>`<tr><td>${i+1}</td><td>${p}</td><td style="text-align:right">${d.u}</td><td style="text-align:right;font-weight:500">${fmt(d.t)}</td></tr>`).join('')
+    :'<tr><td colspan="4" class="empty">Sin datos</td></tr>';
+}
+
+/* ---- MODAL ---- */
+function abrirModal(tipo,id){
+  modalTipo=tipo; editId=id;
+  let isEdit=id!==null;
+  let r=null;
+  if(isEdit){
+    if(tipo==='kardex') r=kardex.find(x=>x.id===id);
+    else if(tipo==='venta') r=ventas.find(x=>x.id===id);
+    else r=inventario.find(x=>x.id===id);
+  }
+  let t,b;
+  if(tipo==='kardex'){
+    t=isEdit?'Editar movimiento':'Nuevo movimiento';
+    let montoAbs=r?Math.abs(r.monto):'';
+    b=`<div class="form-group"><label>Fecha</label><input type="date" id="m-fecha" value="${r?r.fecha:hoy()}"/></div>
+    <div class="form-group"><label>Tipo</label><select id="m-tipo">
+      ${['ingreso','egreso','venta','ajuste'].map(x=>`<option value="${x}" ${r&&r.tipo===x?'selected':''}>${x}</option>`).join('')}
+    </select></div>
+    <div class="form-group"><label>Concepto</label><input type="text" id="m-concepto" value="${r?r.concepto:''}" placeholder="Descripción"/></div>
+    <div class="form-group"><label>Referencia</label><input type="text" id="m-ref" value="${r?r.ref:''}" placeholder="Ej: FAC-001"/></div>
+    <div class="form-group"><label>Monto (S/)</label><input type="number" id="m-monto" value="${montoAbs}" placeholder="0.00" step="0.01" min="0"/></div>`;
+  }else if(tipo==='venta'){
+    t=isEdit?'Editar venta':'Nueva venta';
+    let opts=inventario.map(p=>`<option value="${p.nombre}" ${r&&r.producto===p.nombre?'selected':''}>${p.nombre}</option>`).join('');
+    b=`<div class="form-group"><label>Fecha</label><input type="date" id="m-fecha" value="${r?r.fecha:hoy()}"/></div>
+    <div class="form-group"><label>N° orden</label><input type="text" id="m-orden" value="${r?r.orden:''}" placeholder="ORD-004"/></div>
+    <div class="form-group"><label>Cliente</label><input type="text" id="m-cliente" value="${r?r.cliente:''}" placeholder="Nombre del cliente"/></div>
+    <div class="form-group"><label>Producto</label><select id="m-prod">${opts}</select></div>
+    <div class="form-group"><label>Cantidad</label><input type="number" id="m-cant" value="${r?r.cant:1}" min="1"/></div>
+    <div class="form-group"><label>Precio unitario (S/)</label><input type="number" id="m-precio" value="${r?r.precio:''}" placeholder="0.00" step="0.01" min="0"/></div>`;
+  }else{
+    t=isEdit?'Editar producto':'Nuevo producto';
+    b=`<div class="form-group"><label>Código</label><input type="text" id="m-codigo" value="${r?r.codigo:''}" placeholder="P006"/></div>
+    <div class="form-group"><label>Nombre</label><input type="text" id="m-nombre" value="${r?r.nombre:''}" placeholder="Nombre del producto"/></div>
+    <div class="form-group"><label>Categoría</label><input type="text" id="m-cat" value="${r?r.categoria:''}" placeholder="Ej: Accesorios"/></div>
+    <div class="form-group"><label>Stock</label><input type="number" id="m-stock" value="${r?r.stock:0}" min="0"/></div>
+    <div class="form-group"><label>Precio costo (S/)</label><input type="number" id="m-costo" value="${r?r.costo:''}" placeholder="0.00" step="0.01" min="0"/></div>
+    <div class="form-group"><label>Precio venta (S/)</label><input type="number" id="m-pventa" value="${r?r.pventa:''}" placeholder="0.00" step="0.01" min="0"/></div>`;
+  }
+  document.getElementById('modal-title').textContent=t;
+  document.getElementById('modal-body').innerHTML=b;
+  document.getElementById('modal-bg').classList.add('open');
+}
+
+function cerrarModal(e){if(e.target.id==='modal-bg')document.getElementById('modal-bg').classList.remove('open');}
+
+function guardarModal(){
+  if(modalTipo==='kardex'){
+    let tp=document.getElementById('m-tipo').value;
+    let monto=parseFloat(document.getElementById('m-monto').value)||0;
+    if(tp==='egreso'||tp==='venta')monto=-Math.abs(monto);
+    let obj={fecha:document.getElementById('m-fecha').value,tipo:tp,concepto:document.getElementById('m-concepto').value||'Sin concepto',ref:document.getElementById('m-ref').value||'-',monto};
+    if(editId!==null){let i=kardex.findIndex(x=>x.id===editId);kardex[i]={...kardex[i],...obj};}
+    else{obj.id=nextId.k++;kardex.push(obj);}
+    renderKardex();
+  }else if(modalTipo==='venta'){
+    let cant=parseInt(document.getElementById('m-cant').value)||1;
+    let precio=parseFloat(document.getElementById('m-precio').value)||0;
+    let obj={fecha:document.getElementById('m-fecha').value,orden:document.getElementById('m-orden').value||'ORD-NEW',cliente:document.getElementById('m-cliente').value||'Cliente',producto:document.getElementById('m-prod').value,cant,precio,total:cant*precio};
+    if(editId!==null){let i=ventas.findIndex(x=>x.id===editId);ventas[i]={...ventas[i],...obj};}
+    else{obj.id=nextId.v++;ventas.push(obj);}
+    renderVentas();
+  }else{
+    let obj={codigo:document.getElementById('m-codigo').value||'P00X',nombre:document.getElementById('m-nombre').value||'Producto',categoria:document.getElementById('m-cat').value||'General',stock:parseInt(document.getElementById('m-stock').value)||0,costo:parseFloat(document.getElementById('m-costo').value)||0,pventa:parseFloat(document.getElementById('m-pventa').value)||0};
+    if(editId!==null){let i=inventario.findIndex(x=>x.id===editId);inventario[i]={...inventario[i],...obj};}
+    else{obj.id=nextId.i++;inventario.push(obj);}
+    renderInventario();
+  }
+  document.getElementById('modal-bg').classList.remove('open');
+}
+
+/* ---- ELIMINAR ---- */
+function confirmarEliminar(tipo,id){
+  document.getElementById('confirm-bg').classList.add('open');
+  document.getElementById('confirm-ok').onclick=function(){
+    if(tipo==='kardex'){kardex=kardex.filter(x=>x.id!==id);renderKardex();}
+    else if(tipo==='venta'){ventas=ventas.filter(x=>x.id!==id);renderVentas();}
+    else{inventario=inventario.filter(x=>x.id!==id);renderInventario();}
+    document.getElementById('confirm-bg').classList.remove('open');
+  };
+}
+
+function hoy(){return new Date().toISOString().split('T')[0];}
+
+renderKardex();renderVentas();renderInventario();
+</script>
+<!-- Code injected by live-server -->
+<script>
+	// <![CDATA[  <-- For SVG support
+	if ('WebSocket' in window) {
+		(function () {
+			function refreshCSS() {
+				var sheets = [].slice.call(document.getElementsByTagName("link"));
+				var head = document.getElementsByTagName("head")[0];
+				for (var i = 0; i < sheets.length; ++i) {
+					var elem = sheets[i];
+					var parent = elem.parentElement || head;
+					parent.removeChild(elem);
+					var rel = elem.rel;
+					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
+						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
+						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
+					}
+					parent.appendChild(elem);
+				}
+			}
+			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
+			var address = protocol + window.location.host + window.location.pathname + '/ws';
+			var socket = new WebSocket(address);
+			socket.onmessage = function (msg) {
+				if (msg.data == 'reload') window.location.reload();
+				else if (msg.data == 'refreshcss') refreshCSS();
+			};
+			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
+				console.log('Live reload enabled.');
+				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
+			}
+		})();
+	}
+	else {
+		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
+	}
+	// ]]>
+</script>
+
+</body></html>
